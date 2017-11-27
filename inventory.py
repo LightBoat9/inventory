@@ -59,11 +59,14 @@ class Inventory(object):
     The inventory will take in a filepath to the inventory text file and a size. The filepath should point to either
     an empty text file or a previously created inventory file. If the file exists and holds item data, then the item
     data is used to create the inventory. If the new inventory size differs from the file then the new inventory will
-    be cut or extended. Otherwise a blank inventory will be instanced with the number of slots added.
+    be cut or extended. Otherwise a blank inventory will be instanced with the number of slots added. If the file
+    inventory size is unknown size can be omitted and the size of the inventory file will be used
     """
-    def __init__(self, path, size):
+    def __init__(self, path, size=None):
+        open(path, "a").close()  # Create a blank file if it does not exist
         self.path = path
         self.size = size
+        if size is None: self.size = self._inv_file_length()
         self.items_count = 0
         self.items_list = []
         self._update()
@@ -92,20 +95,28 @@ class Inventory(object):
                 if i >= _slot_count: self.items_list.append(Item())
                 file.write(str(self.items_list[i]))
 
-    def add(self, item, slot):
+    def _inv_file_length(self):
+        with open(self.path, "r") as file: data = file.readlines()
+        return len(data)
+
+    def add(self, item, slot=None):
         """Adds an item to the inventory.
 
-        Adds the passed in Item instance to the inventory at the passed in slot number.
+        Adds the passed in Item instance to the inventory at the optional passed in slot number. If not slot number is
+        passed in the next free empty slot is used. If no slot is specified and there is no empty slot available then
+        it will throw a IndexError. Use has_space before adding an item without slot specified to ensure that no error
+        is thrown
 
         Args:
             item (Item): instance of the item to add.
-            slot (int): integer inventory slot.
+            slot (int): optional integer inventory slot.
 
         Raises:
-            ValueError: if slot is negative or greater than or equal to the inventory size
+            IndexError: if slot is negative or greater than or equal to the inventory size
         """
-        if slot < 0: raise ValueError("slot can not be negative")
-        if slot >= self.size: raise ValueError("slot can not be larger than inventory size")
+        if slot is None: slot = self.get_first_empty()
+        if slot < 0: raise IndexError("slot can not be negative")
+        if slot >= self.size: raise IndexError("slot can not be larger than inventory size")
 
         with open(self.path, "r") as file:
             data = file.readlines()
@@ -134,6 +145,7 @@ class Inventory(object):
 
         item = self.items_list[slot]
 
+        # _update not used because only one line needs to be changed
         with open(self.path, "r") as file:
             data = file.readlines()
 
@@ -145,8 +157,27 @@ class Inventory(object):
 
         return item
 
+    def remove_all(self):
+        """Removes and returns all of the inventory items
+
+        Sets all of the inventory slots to empty items and returns a list of items removed. The list will not contain
+        existing inventory slots.
+
+        Returns:
+            A list of the inventory items that were removed
+        """
+        items = []
+        for i, item in enumerate(self.items_list):
+            if not item.is_empty():
+                items.append(self.items_list[i])
+                self.items_list[i] = Item()
+
+        self._update()
+
+        return items
+
     def has_space(self):
-        """Returns true if at least one slot in the inventory is empty"""
+        """Returns true if at least one slot in the inventory is an empty Item"""
         return self.items_count != len(self.items_list)
 
     def get_first_empty(self):
@@ -155,15 +186,23 @@ class Inventory(object):
         for i in range(len(self.items_list)):
             if self.items_list[i].is_empty(): return i
 
-    def get_items_with_kwargs(self, arg, arg_value=None):
-        """Returns a list of the inventory items that contain the keyword argument, and optionally limit the list to
-        only the items that contain a specific value for the keyword argument"""
+    def get_items_with_kwargs(self, keyword, arg=None):
+        """Returns a list of inventory items with the specific keyword argument.
+
+        Args:
+            keyword (str): The string keyword in the items kwargs
+            arg: The optional argument that the keyword must equal
+        Returns:
+            A list of the inventory items that contain the keyword argument,
+            and optionally limit the list to only the items that contain a specific value
+            for the keyword argument.
+        """
         out = []
         for i in self.items_list:
-            if arg in i.kwargs:
-                if arg_value is None:
+            if keyword in i.kwargs:
+                if arg is None:
                     out.append(i)
-                elif i.kwargs[arg] == arg_value:
+                elif i.kwargs[keyword] == arg:
                     out.append(i)
         return out
 
