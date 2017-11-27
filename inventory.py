@@ -1,15 +1,49 @@
 import ast
 
+
 class Item(object):
     """Represents an item that can be stored in the inventory
 
     The item takes in as many named arguments as necessary that describe the item
 
     Example:
-        Item(name="Health Pot", category="Pots")
+        Item(name="health pot", category="pots")
     """
     def __init__(self, **kwargs):
         self.kwargs = kwargs
+
+    def get(self, keyword):
+        """Returns the argument for the items keyword attribute.
+
+        This can also be accessed by directly accessing the items kwargs dictionary. However this function will return
+        None if the keyword does not exist.
+
+        Example:
+            item = Item(name="potion")
+            item.kwargs["name"]  # returns "potion"
+            item.kwargs["type"]  # raises KeyError
+            item.get("name")  # returns "potion"
+            item.get("type")  # returns None
+
+        Args:
+            keyword (str): The string keyword name.
+
+        Returns:
+            The argument for the keyword or None if the keyword does not exist.
+        """
+        try:
+            return self.kwargs[keyword]
+        except KeyError:
+            return None
+
+    def set(self, keyword, arg):
+        """Sets the value for the keyword in kwargs.
+
+        Args:
+            keyword (str): The string keyword name
+            arg: The value to set the keyword to, will be stored as a string
+        """
+        self.kwargs[keyword] = arg
 
     def is_empty(self):
         """Returns true if the item was created with no keyword arguments"""
@@ -32,9 +66,9 @@ class Inventory(object):
         self.size = size
         self.items_count = 0
         self.items_list = []
-        self._add_slots()
+        self._update()
 
-    def _add_slots(self):
+    def _update(self):
         """Reads the inventory file and cuts or extends it to fit the passed in size
 
         Iterates through the inventory file lines and parses the information into Item instances. This can cut and
