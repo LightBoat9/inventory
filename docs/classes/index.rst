@@ -3,6 +3,6 @@ Inventory API
 
 .. toctree::
    :maxdepth: 1
-   :caption: Class Reference
 
-   api
+   class_item
+   class_inventory

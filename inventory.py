@@ -223,7 +223,9 @@ class Inventory(object):
         return item
 
     def remove_first(self):
-        return self.remove_from(self.find_first_item())
+        item = self.remove_from(self.find_first_item())
+        if item == -1: raise NoSuchItemError
+        return item
 
     def remove_all(self):
         """Removes and returns all of the inventory items.
