@@ -1,7 +1,9 @@
-.. Item Class.
+.. toctree::
+   :maxdepth: 1
+   :caption: Item
 
-Item Class
-===========
+Item
+====
 
 Represents an inventory item instance for storing and retrieving item properties.
 
