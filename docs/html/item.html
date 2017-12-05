@@ -1,0 +1,115 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Item Class &#8212; Inventory 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="About Inventory" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="toctree-wrapper compound">
+</div>
+<div class="section" id="item-class">
+<h1>Item Class<a class="headerlink" href="#item-class" title="Permalink to this headline">¶</a></h1>
+<p>Represents an inventory item instance for storing and retrieving item properties.</p>
+<div class="section" id="class-methods">
+<h2>Class Methods<a class="headerlink" href="#class-methods" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="67%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="2"><a class="reference external" href="#item-item-str-kwargs">Item</a> <a href="#id1"><span class="problematic" id="id2">|</span></a>Item(self, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs)</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="item-item-str-kwargs">
+<h3>Item <code class="docutils literal"><span class="pre">**Item(str,</span> <span class="pre">**kwargs)</span></code><a class="headerlink" href="#item-item-str-kwargs" title="Permalink to this headline">¶</a></h3>
+<p>Constructs a new inventory item with as many keyword arguments describing the item as needed</p>
+</div>
+<div class="section" id="str-get-self-keyword">
+<h3>str get(self, keyword)<a class="headerlink" href="#str-get-self-keyword" title="Permalink to this headline">¶</a></h3>
+<p>Return the argument for the dictionary key <code class="docutils literal"><span class="pre">keyword</span></code> in <code class="docutils literal"><span class="pre">kwargs</span></code></p>
+<p>Equivalent to <code class="docutils literal"><span class="pre">Item().kwargs[keyword]</span></code> however, it does not throw a <code class="docutils literal"><span class="pre">KeyError</span></code> if the key is missing.
+Instead, it returns <code class="docutils literal"><span class="pre">None</span></code></p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">About Inventory</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Luke Sloop.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/item.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
