@@ -1,9 +1,5 @@
 .. Item Class.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Item:
-
 Item Class
 ===========
 

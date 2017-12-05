@@ -12,7 +12,7 @@ created inventories. I created this for practice in writing python and in practi
 with `readthedocs <https://readthedocs.org/>`_ and `sphynx <http://www.sphinx-doc.org/en/stable/index.html>`_
 
 .. toctree::
-   :titlesonly:
+   :maxdepth: 2
    :caption: Reference
 
    item
