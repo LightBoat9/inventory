@@ -66,45 +66,32 @@ class Inventory(object):
     with the number of slots added. If the file inventory size is unknown
     size can be omitted and the size of the inventory file will be used
     """
-    def __init__(self, path, size=None):
-        open(path, "a").close()  # Create a blank file if it does not exist
-        self._path = path
+    def __init__(self, size):
         self._size = size
-        if size is None: self.size = self._get_file_length()
-        self.items_count = 0
-        self.items_list = []
-        self._update()
+        self._items_count = 0
+        self._items_list = []
+        for i in range(self._size):
+            self._items_list.append(Item())
         self._iter_i = 0
 
-    @property
-    def path(self):
-        return self._path
+    def load(self, path):
+        with open(path, "r") as file:
+            data = file.readlines()
 
-    @path.setter
-    def path(self, path):
-        self._path = path
-        self.items_list = []
-        self._update()
+        _slot_count = 0
+        self.size = self._get_file_length(path)
+        for i in range(min(len(data), self.size)):
+            keys = data[i].rstrip()
+            if keys:  # Ignores empty lines
+                if i >= len(self._items_list):
+                    self._items_list.append(Item(**ast.literal_eval(keys)))
+                if not self._items_list[i].is_empty(): self._items_count += 1
+                _slot_count += 1
 
-    @path.getter
-    def path(self):
-        return self._path
+        for i in range(self.size):
+            if i >= _slot_count: self._items_list.append(Item())
 
-    @property
-    def size(self):
-        return self._size
-
-    @size.setter
-    def size(self, size):
-        self._size = size
-        self.items_list = []
-        self._update()
-
-    @size.getter
-    def size(self):
-        return self._size
-
-    def _update(self):
+    def save(self, path):
         """Reads the inventory file and cuts or
         extends it to fit the passed in size
 
@@ -114,24 +101,87 @@ class Inventory(object):
         inventory size, otherwise it loads the information into
         the new inventory instance.
         """
-        _slot_count = 0
-        self.items_count = 0
+        open(path, "a").close()  # Create a blank file if it does not exist
+        self._items_count = 0
 
-        with open(self.path, "r") as file:
+        with open(path, "r") as file:
             data = file.readlines()
 
-        for i in range(min(len(data), self.size)):
-            keys = data[i].rstrip()
-            if keys:  # Ignores empty lines
-                if i >= len(self.items_list):
-                    self.items_list.append(Item(**ast.literal_eval(keys)))
-                if not self.items_list[i].is_empty(): self.items_count += 1
-                _slot_count += 1
-
-        with open(self.path, "w") as file:
+        with open(path, "w") as file:
             for i in range(self.size):
-                if i >= _slot_count: self.items_list.append(Item())
-                file.write(str(self.items_list[i]))
+                file.write(str(self._items_list[i]))
+
+    def shift_down(self):
+        """Sorts the inventory so that non-empty
+           items come before empty items.
+
+        Sorts the inventory using Insertion sort, pushing all existing items
+        to the front of the inventory.
+
+        Example:
+            {}
+            {'name': 'health potion'}
+
+            After shift_down() becomes...
+
+            {'name': 'health potion'}
+            {}
+        """
+        for a in range(1, len(self._items_list)):
+            b = 0
+            while (not self._items_list[a - b].is_empty()
+                   and self._items_list[a - b - 1].is_empty()):
+                self._sort_swap(a - b)
+                if a - b - 1 == 0: break
+                b += 1
+
+    def sort(self, keyword):
+        """Sorts the inventory by keyword.
+
+        Sorts the inventory using insertion sort,
+        moving the items with the keyword to the top. Also sorts the items
+        keyword values in alphabetical order.
+
+        Args:
+            keyword (str): The string keyword argument to sort the inventory by
+        """
+        self.shift_down()
+        for a in range(1, self._items_count):
+            b = 0
+            while True:
+                # If both of the items contain the keyword
+                index = a - b
+                first = self._items_list[index - 1].get(keyword)
+                second = self._items_list[index].get(keyword)
+                if first.isdigit() != second.isdigit():
+                    raise TypeError("keyword argument values are of different types")
+
+                if (self._items_list[index].has_keyword(keyword) and
+                        self._items_list[index - 1].has_keyword(keyword)):
+                    if len(first) > len(second): self._sort_swap(index)
+
+                    if first.isdigit() and second.isdigit():
+                        if int(second) < int(first):
+                            self._sort_swap(index)
+                    else:
+                        for c in range(min(len(first), len(second))):
+                            if ord(second[c]) < ord(first[c]):
+                                self._sort_swap(index)
+                            if second[c] != first[c]: break
+
+                else:
+                    # If the first item does not contains the keyword and
+                    # the second item does swap
+                    if self._items_list[index].has_keyword(keyword) and (
+                            not self._items_list[index - 1].has_keyword(keyword)):
+                        self._sort_swap(index)
+                if index - 1 == 0: break
+                b += 1
+
+    def _sort_swap(self, index):
+        (self._items_list[index],
+         self._items_list[index - 1]) = (self._items_list[index - 1],
+                                         self._items_list[index])
 
     def add(self, item):
         """Adds an item to the inventory.
@@ -166,23 +216,84 @@ class Inventory(object):
         if slot >= self.size:
             raise IndexError("slot can not be larger than inventory size")
 
-        with open(self.path, "r") as file:
-            data = file.readlines()
-        data[slot] = str(item)
-        with open(self.path, "w") as file:
-            file.writelines(data)
+        if self._items_list[slot].is_empty(): self._items_count += 1
+        self._items_list[slot] = item
 
-        if self.items_list[slot].is_empty(): self.items_count += 1
-        self.items_list[slot] = item
+    def find(self, item):
+        for a, b in enumerate(self._items_list):
+            if b == item: return a
+        return -1
+
+    def find_first_item(self):
+        for a, b in enumerate(self._items_list):
+            if not b.is_empty(): return a
+        return -1
+
+    def find_first_empty(self):
+        """Returns the first empty slot or -1 if the inventory is full"""
+        if not self.has_space(): return -1
+        for i in range(len(self._items_list)):
+            if self._items_list[i].is_empty(): return i
 
     def get(self, slot):
         """Returns the item instance at the inventory slot"""
         if slot < 0: raise ValueError("slot can not be negative")
         if slot >= self.size:
             raise ValueError("slot can not be larger than inventory size")
-        if self.items_list[slot].is_empty():
+        if self._items_list[slot].is_empty():
             return None
-        return self.items_list[slot]
+        return self._items_list[slot]
+
+    def get_empty_count(self):
+        count = 0
+        for i in self._items_list:
+            if i.is_empty(): count += 1
+        return count
+
+    def get_first_item(self):
+        for i in self._items_list:
+            if i.is_empty(): return i
+
+    def get_items(self):
+        out = []
+        for i in self._items_list:
+            if not i.is_empty(): out.append(i)
+        return out
+
+    def get_items_with_kwargs(self, keyword, arg=None):
+        """Returns a list of inventory items with the
+           specific keyword argument.
+
+        Args:
+            keyword (str): The string keyword in the items kwargs
+            arg: The optional argument that the keyword must equal
+
+        Returns:
+            A list of the inventory items that contain the keyword argument,
+            and optionally limit the list to only the items that contain a
+            specific value for the keyword argument.
+        """
+        out = []
+        for i in self._items_list:
+            if keyword in i.kwargs:
+                if arg is None:
+                    out.append(i)
+                elif i.kwargs[keyword] == arg:
+                    out.append(i)
+        return out
+
+    def _get_file_length(self, path):
+        with open(path, "r") as file: data = file.readlines()
+        return len(data)
+
+    def has_space(self):
+        """Returns true if at least one slot in
+           the inventory is an empty Item
+        """
+        return self._items_count != len(self._items_list)
+
+    def is_empty(self):
+        return self._items_count == 0
 
     def remove(self, item):
         i = self.find(item)
@@ -205,20 +316,11 @@ class Inventory(object):
         if slot >= self.size:
             raise ValueError("slot can not be larger than inventory size")
 
-        item = self.items_list[slot]
+        item = self._items_list[slot]
         if item.is_empty(): raise SlotEmptyError("can not remove item from empty inventory slot")
 
-        # _update not used because only one line needs to be changed.
-        with open(self.path, "r") as file:
-            data = file.readlines()
-
-        self.items_list[slot] = Item()
-        data[slot] = str(self.items_list[slot])
-
-        with open(self.path, "w") as file:
-            file.writelines(data)
-
-        self.items_count -= 1
+        self._items_list[slot] = Item()
+        self._items_count -= 1
 
         return item
 
@@ -238,155 +340,13 @@ class Inventory(object):
             A list of the inventory items that were removed.
         """
         items = []
-        for i, item in enumerate(self.items_list):
+        for i, item in enumerate(self._items_list):
             if not item.is_empty():
-                items.append(self.items_list[i])
-                self.items_list[i] = Item()
-
-        self._update()
+                items.append(self._items_list[i])
+                self._items_list[i] = Item()
+        self._items_count = 0
 
         return items
-
-    def shift_down(self):
-        """Sorts the inventory so that non-empty
-           items come before empty items.
-
-        Sorts the inventory using Insertion sort, pushing all existing items
-        to the front of the inventory.
-
-        Example:
-            {}
-            {'name': 'health potion'}
-
-            After shift_down() becomes...
-
-            {'name': 'health potion'}
-            {}
-        """
-        for a in range(1, len(self.items_list)):
-            b = 0
-            while (not self.items_list[a - b].is_empty()
-                   and self.items_list[a - b - 1].is_empty()):
-                self._sort_swap(a - b)
-                if a - b - 1 == 0: break
-                b += 1
-        self._update()
-
-    def sort(self, keyword):
-        """Sorts the inventory by keyword.
-
-        Sorts the inventory using insertion sort,
-        moving the items with the keyword to the top. Also sorts the items
-        keyword values in alphabetical order.
-
-        Args:
-            keyword (str): The string keyword argument to sort the inventory by
-        """
-        self.shift_down()
-        for a in range(1, self.items_count):
-            b = 0
-            while True:
-                # If both of the items contain the keyword
-                index = a - b
-                first = self.items_list[index - 1].get(keyword)
-                second = self.items_list[index].get(keyword)
-                if first.isdigit() != second.isdigit():
-                    raise TypeError("keyword argument values are of different types")
-
-                if (self.items_list[index].has_keyword(keyword)
-                    and self.items_list[index - 1].has_keyword(keyword)):
-                    if len(first) > len(second): self._sort_swap(index)
-
-                    if first.isdigit() and second.isdigit():
-                        if int(second) < int(first):
-                            self._sort_swap(index)
-                    else:
-                        for c in range(min(len(first), len(second))):
-                            if ord(second[c]) < ord(first[c]):
-                                self._sort_swap(index)
-                            if second[c] != first[c]: break
-
-                else:
-                    # If the first item does not contains the keyword and
-                    # the second item does swap
-                    if self.items_list[index].has_keyword(keyword) and (
-                            not self.items_list[index - 1].has_keyword(keyword)):
-                        self._sort_swap(index)
-                if index - 1 == 0: break
-                b += 1
-        self._update()
-
-    def _sort_swap(self, index):
-        (self.items_list[index],
-         self.items_list[index - 1]) = (self.items_list[index - 1],
-                                        self.items_list[index])
-
-    def has_space(self):
-        """Returns true if at least one slot in
-           the inventory is an empty Item
-        """
-        return self.items_count != len(self.items_list)
-
-    def is_empty(self):
-        return self.items_count == 0
-
-    def find(self, item):
-        for a, b in enumerate(self.items_list):
-            if b == item: return a
-        return -1
-
-    def find_first_item(self):
-        for a, b in enumerate(self.items_list):
-            if not b.is_empty(): return a
-        return -1
-
-    def find_first_empty(self):
-        """Returns the first empty slot or -1 if the inventory is full"""
-        if not self.has_space(): return -1
-        for i in range(len(self.items_list)):
-            if self.items_list[i].is_empty(): return i
-
-    def get_empty_count(self):
-        count = 0
-        for i in self.items_list:
-            if i.is_empty(): count += 1
-        return count
-
-    def get_first_item(self):
-        for i in self.items_list:
-            if i.is_empty(): return i
-
-    def get_items(self):
-        out = []
-        for i in self.items_list:
-            if not i.is_empty(): out.append(i)
-        return out
-
-    def get_items_with_kwargs(self, keyword, arg=None):
-        """Returns a list of inventory items with the
-           specific keyword argument.
-
-        Args:
-            keyword (str): The string keyword in the items kwargs
-            arg: The optional argument that the keyword must equal
-
-        Returns:
-            A list of the inventory items that contain the keyword argument,
-            and optionally limit the list to only the items that contain a
-            specific value for the keyword argument.
-        """
-        out = []
-        for i in self.items_list:
-            if keyword in i.kwargs:
-                if arg is None:
-                    out.append(i)
-                elif i.kwargs[keyword] == arg:
-                    out.append(i)
-        return out
-
-    def _get_file_length(self):
-        with open(self.path, "r") as file: data = file.readlines()
-        return len(data)
 
     def __iter__(self):
         return self
@@ -394,7 +354,7 @@ class Inventory(object):
     def __next__(self):
         if self._iter_i < self.size:
             self._iter_i += 1
-            return self.items_list[self._iter_i - 1]
+            return self._items_list[self._iter_i - 1]
         self._iter_i = 0
         raise StopIteration
 
@@ -405,10 +365,10 @@ class Inventory(object):
         return self.get(item)
 
     def __len__(self):
-        return self.items_count
+        return self._items_count
 
     def __add__(self, other):
-        inv = Inventory(self.path, self.size + other.size)
+        inv = Inventory(self.size + other.size)
         count = 0
         for i in self:
             inv.set(count, i)
@@ -419,25 +379,26 @@ class Inventory(object):
         return inv
 
     def __eq__(self, other):
-        if len(self.items_list) != len(other.items_list): return False
+        if len(self._items_list) != len(other._items_list): return False
         for i in range(len(self)):
-            if self.items_list[i] != other.items_list[0]: return False
+            if self._items_list[i] != other._items_list[0]: return False
         return True
 
     def __lt__(self, other):
-        return self.items_count < other.items_count
+        return self._items_count < other._items_count
 
     def __le__(self, other):
-        return self.items_count <= other.items_count
+        return self._items_count <= other._items_count
 
     def __str__(self):
         out = "[ "
-        for i in self.items_list:
+        for i in self._items_list:
             out += str(i).strip() + ", "
         out += "]"
         return out
 
 
 class SlotEmptyError(Exception): pass
+
 
 class NoSuchItemError(Exception): pass

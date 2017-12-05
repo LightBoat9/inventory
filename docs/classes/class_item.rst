@@ -27,34 +27,38 @@ Instance Methods
 +------------------------+-------------------------------------------------------------------+
 | bool                   | :ref:`is_empty <Item.is_empty>` ( )                               |
 +------------------------+-------------------------------------------------------------------+
-| str                    | :ref:`__str__ <Item.str>` ( )                                     |
-+------------------------+-------------------------------------------------------------------+
+
+Description
+-----------
+
+Represents an item that can be stored in an inventory. The item takes in as many named arguments
+as necessary that describe it.
 
 Instance Variables
 ------------------
 
 .. _Item.kwargs:
 
-- dict kwargs - A list of keywords describing the item
+- **dict kwargs** - A list of keywords describing the item
 
 Instance Method Descriptions
 ----------------------------
 
 .. _Item:
 
-- Item Item ( dict kwargs )
+- **Item Item (** dict kwargs **)**
 
 Construct a new inventory item with as many keyword arguments describing the item as needed.
 
 .. _Item.set:
 
-- None set ( str keyword, str arg )
+- **None set (** str keyword, str arg **)**
 
 Set the value for the keyword argument in `self.kwargs`.
 
 .. _Item.get:
 
-- str get ( str keyword )
+- **str get (** str keyword **)**
 
 Return the argument for the dictionary key ``keyword`` in ``kwargs``.
 
@@ -63,19 +67,22 @@ Instead, it returns ``None``.
 
 .. _Item.has_keyword:
 
-- bool has_keyword ( str keyword )
+- **bool has_keyword (** str keyword **)**
 
 Return `True` if the `keyword` exists in :ref:`kwargs <Item.kwargs>`, Else return `False`.
 
 .. _Item.is_empty:
 
-- bool is_empty ( )
+- **bool is_empty ( )**
 
-Return `True` if no :ref:`kwargs <Item.kwargs>` were passed in, Else return `False`.
+Returns `True` if no :ref:`kwargs <Item.kwargs>` were passed in, otherwise returns `False`.
+
+Supported Magic Methods
+-----------------------
 
 .. _Item.str:
 
-- str __str__ ( )
+- **str __str__ ( )**
 
-Return :ref:`kwargs <Item.kwargs>` as a string.
+Returns :ref:`kwargs <Item.kwargs>` as a string.
 
