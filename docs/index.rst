@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-About Inventory
-===============
+Inventory
+=========
 
 Inventory is a simple game save system written in python. The inventory allows you to control
 what describes the items and store them. It also handles automatically loading previously
@@ -13,6 +13,6 @@ with `readthedocs <https://readthedocs.org/>`_ and `sphynx <http://www.sphinx-do
 
 .. toctree::
    :titlesonly:
-   :caption: Contents
+   :caption: Reference
 
    item
