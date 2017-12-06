@@ -1,12 +1,14 @@
 .. toctree::
    :maxdepth: 1
 
+.. _Inventory:
+
 Inventory
 =========
 
 **Inherits:** object
 
-**Module:** inventory
+**Module:** :ref:`inventory <Module_Inventory>`
 
 Brief Description
 -----------------
@@ -17,19 +19,19 @@ Instance Methods
 ----------------
 
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
-| :ref:`Inventory <Inventory>`      | :ref:`Inventory <Inventory>` ( int size )                                                     |
+| :ref:`Inventory <Inventory.init>` | :ref:`Inventory <Inventory.init>` ( int size )                                                |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
 | None                              | :ref:`load <Inventory.load>` ( str path )                                                     |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
 | None                              | :ref:`save <Inventory.save>` ( str path )                                                     |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
-| None                              | :ref:`shift_down <Inventory.shift_down>` ( )                                                  |
-+-----------------------------------+-----------------------------------------------------------------------------------------------+
-| None                              | :ref:`sort <Inventory.sort>` ( str keyword )                                                  |
+| None                              | :ref:`sort <Inventory.sort>` ( str keyword=None )                                             |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
 | None                              | :ref:`add <Inventory.add>` ( :ref:`Item <Item>` item )                                        |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
 | None                              | :ref:`set <Inventory.set>` ( int slot, :ref:`Item <Item>` item )                              |
++-----------------------------------+-----------------------------------------------------------------------------------------------+
+| None                              | :ref:`set_size <Inventory.set_size>` ( int size )                                             |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
 | int                               | :ref:`find <Inventory.find>` ( :ref:`Item <Item>` item )                                      |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
@@ -41,13 +43,15 @@ Instance Methods
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
 | int                               | :ref:`get_empty_count <Inventory.get_empty_count>` ( )                                        |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
-| :ref:`Item <Item>`                | :ref:`get_first_item <Inventory.get_first_item>` ( )                                          |
+| int                               | :ref:`get_items_count <Inventory.get_items_count>` ( )                                        |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
 | List                              | :ref:`get_items <Inventory.get_items>` ( )                                                    |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
 | List                              | :ref:`get_items_with_kwargs <Inventory.get_items_with_kwargs>` ( str keyword, str args=None ) |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
-| bool                              | :ref:`has_space <Inventory.has_space>` ( )                                                    |
+| int                               | :ref:`get_size <Inventory.get_size>` (  )                                                     |
++-----------------------------------+-----------------------------------------------------------------------------------------------+
+| bool                              | :ref:`is_full <Inventory.is_full>` ( )                                                        |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
 | bool                              | :ref:`is_empty <Inventory.is_empty>` ( )                                                      |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
@@ -55,15 +59,13 @@ Instance Methods
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
 | List                              | :ref:`remove_all <Inventory.remove_all>` ( )                                                  |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
-| :ref:`Item <Item>`                | :ref:`remove_first <Inventory.remove_first>` ( )                                              |
-+-----------------------------------+-----------------------------------------------------------------------------------------------+
 | :ref:`Item <Item>`                | :ref:`remove_from <Inventory.remove_from>` ( int slot )                                       |
 +-----------------------------------+-----------------------------------------------------------------------------------------------+
 
 Instance Method Descriptions
 ----------------------------
 
-.. _Inventory:
+.. _Inventory.init:
 
 - **Inventory Inventory (** int size **)**
 
@@ -81,25 +83,20 @@ Loads an inventory from the passed in filepath.
 
 Saves the current inventory to the passed in filepath
 
-.. _Inventory.shift_down:
-
-- **None shift_down ( )**
-
-Removes any empty slots at the start of the inventory shifting the items down.
-
 .. _Inventory.sort:
 
-- **None sort (** str keyword **)**
+- **None sort (** str keyword=None **)**
 
 Moves the items with the ``keyword`` to the start of the inventory sorting them by ``keyword`` in either
-alphabetical order or numerical order (If only contains numbers).
+alphabetical order or numerical order (If only contains numbers). If ``keyword`` is not passed in then it just moves all
+of the items to the start of the inventory.
 
 .. _Inventory.add:
 
 - **None add (** :ref:`Item <Item>` item **)**
 
 Add the passed in item instance to the inventory at the next empty slot.
-If no slot is empty then it will raise an ``InventoryFullError``. Use :ref:`has_space <Inventory.has_space>`
+If no slot is empty then it will raise an ``OverflowError``. Use :ref:`is_full <Inventory.is_full>`
 before adding an item without slot specified to ensure that no error is thrown.
 
 .. _Inventory.set:
@@ -108,6 +105,13 @@ before adding an item without slot specified to ensure that no error is thrown.
 
 Add the ``item`` to the specific inventory slot, The new ``item``
 will replace the current ``item`` if one exists.
+
+.. _Inventory.set_size:
+
+- **None set_size (** int size **)**
+
+Sets the number of items that the inventory can hold. This will cut off any items that are past the current size,
+or add empty slots to extend the size.
 
 .. _Inventory.get:
 
@@ -121,11 +125,12 @@ Return the item instance at the inventory ``slot`` index.
 
 Returns the number of empty slots in the inventory.
 
-.. _Inventory.get_first_item:
+.. _Inventory.get_items_count:
 
-- :ref:`Item <Item>` **get_first_item ( )**
+- **int get_items_count (** :ref:`Item <Item>` item **)**
 
-Returns the first `item` in the inventory.
+Returns the number of items if ``item`` is ``None``. If ``item`` is specified then returns the number of instances of that
+item in the inventory.
 
 .. _Inventory.get_items:
 
@@ -137,46 +142,53 @@ Returns a `List` of items in the inventory. Alternative to `Item().items_list` t
 
 - **List get_items_with_kwargs (** str keyword, str arg=None **)**
 
-Returns a list of inventory items with the specific `keyword` argument. If `arg` is not `None` then it will return only
-the items that have the keyword argument and the arguments value is `args`
+Returns a list of inventory items with the specific ``keyword`` argument. If ``arg`` is not ``None`` then it will return only
+the items that have the keyword argument and the arguments value is ``args``
+
+.. _Inventory.get_size:
+
+- **List get_size ( )**
+
+Returns the the amount of items the inventory can hold
 
 .. _Inventory.find:
 
 - **int find (** :ref:`Item <Item>` item **)**
 
 Returns the first slot index of the ``item`` if it exists in the inventory. If no :ref:`Item <Item>` is found returns
-`-1`.
+``-1``.
 
 .. _Inventory.find_first_item:
 
 - **int find_first_item ( )**
 
 Returns the slot index of the first item in the inventory if the inventory is not empty. If the inventory is empty
-returns `-1`.
+returns ``-1``.
 
 .. _Inventory.find_first_empty:
 
 - **int find_first_empty ( )**
 
-Returns the slot index of the first empty slot in the inventory. If the inventory is full returns `-1`.
+Returns the slot index of the first empty slot in the inventory. If the inventory is full returns ``-1``.
 
-.. _Inventory.has_space:
+.. _Inventory.is_full:
 
-- **bool has_space ( )**
+- **bool is_full ( )**
 
-Returns `True` if the inventory has at least one slot empty. Otherwise returns `False`.
+Returns ``True`` if the inventory has no empty slots. Otherwise returns ``False``.
 
 .. _Inventory.is_empty:
 
 - **bool is_empty ( )**
 
-Returns `True` if the inventory does not contain any items. If the inventory contains one or more items, returns `False`
+Returns ``True`` if the inventory does not contain any items. If the inventory contains one or more items, returns ``False``
 
 .. _Inventory.remove:
 
 - :ref:`Item <Item>` **remove (** :ref:`Item <Item>` item **)**
 
-Remove and return the first instance of the ``item``. If the item is not found it will raise a ``NoSuchItemError``.
+Remove and return the first instance of the ``item``. If the item is not found it will raise a
+:ref:`SlotEmptyError <SlotEmptyError>`.
 
 .. _Inventory.remove_all:
 
@@ -184,17 +196,12 @@ Remove and return the first instance of the ``item``. If the item is not found i
 
 Removes all :ref:`Items <Item>` and returns them as a ``List``.
 
-.. _Inventory.remove_first:
-
-- :ref:`Item <Item>` **remove_first ( )**
-
-Remove and return the first :ref:`Item <Item>` found. If no item is found it will raise a ``NoSuchItemError``.
-
 .. _Inventory.remove_from:
 
 - :ref:`Item <Item>` **remove_from (** int slot **)**
 
-Remove and return the ``item`` from the inventory slot index. If the slot index is empty it raises a ``SlotEmptyError``.
+Remove and return the ``item`` from the inventory slot index. If the slot index is empty it raises a
+:ref:`SlotEmptyError <SlotEmptyError>`.
 
 Supported Magic Methods
 -----------------------
@@ -252,5 +259,3 @@ Returns ``True`` if this inventory has less or equal number of items than the ot
 - **str __str__ ( )**
 
 Returns this inventory as a ``string``.
-
-

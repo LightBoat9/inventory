@@ -1,12 +1,14 @@
 .. toctree::
    :maxdepth: 1
 
+.. _Item:
+
 Item
 ====
 
 **Inherits:** object
 
-**Module:** inventory
+**Module:** :ref:`inventory <Module_Inventory>`
 
 Brief Description
 -----------------
@@ -22,10 +24,6 @@ Instance Methods
 | None                   | :ref:`set <Item.set>` ( str keyword, str arg )                    |
 +------------------------+-------------------------------------------------------------------+
 | str                    | :ref:`get <Item.get>` ( str keyword )                             |
-+------------------------+-------------------------------------------------------------------+
-| bool                   | :ref:`has_keyword <Item.has_keyword>` ( str keyword )             |
-+------------------------+-------------------------------------------------------------------+
-| bool                   | :ref:`is_empty <Item.is_empty>` ( )                               |
 +------------------------+-------------------------------------------------------------------+
 
 Description
@@ -44,7 +42,7 @@ Instance Variables
 Instance Method Descriptions
 ----------------------------
 
-.. _Item:
+.. _Item.init:
 
 - **Item Item (** dict kwargs **)**
 
@@ -54,28 +52,14 @@ Construct a new inventory item with as many keyword arguments describing the ite
 
 - **None set (** str keyword, str arg **)**
 
-Set the value for the keyword argument in `self.kwargs`.
+Set the value for the keyword argument in :ref:`kwargs <Item.kwargs>`.
 
 .. _Item.get:
 
 - **str get (** str keyword **)**
 
-Return the argument for the dictionary key ``keyword`` in ``kwargs``.
-
-Equivalent to ``Item().kwargs[keyword]`` however, it does not throw a ``KeyError`` if the key is missing.
-Instead, it returns ``None``.
-
-.. _Item.has_keyword:
-
-- **bool has_keyword (** str keyword **)**
-
-Return `True` if the `keyword` exists in :ref:`kwargs <Item.kwargs>`, Else return `False`.
-
-.. _Item.is_empty:
-
-- **bool is_empty ( )**
-
-Returns `True` if no :ref:`kwargs <Item.kwargs>` were passed in, otherwise returns `False`.
+Return the argument for the dictionary key ``keyword`` in ``kwargs``. Returns ``None`` if the keyword is not in
+kwargs
 
 Supported Magic Methods
 -----------------------
